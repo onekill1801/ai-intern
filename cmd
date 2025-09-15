@@ -1,4 +1,4 @@
-python3 -m venv venv
+#python3 -m venv venv
 
 source venv/bin/activate
 venv\Scripts\Activate.ps1
@@ -14,3 +14,8 @@ pip install "gymnasium[classic-control]"
 pip install ale-py
 
 pip install gym[atari]
+
+pip freeze > equirements.txt
+pip install -r requirements.txt
+
+pip list

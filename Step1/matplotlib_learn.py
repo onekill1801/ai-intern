@@ -21,9 +21,11 @@ plt.bar(df["Name"], df["Average"])
 plt.title("Điểm trung bình của học sinh")
 plt.xlabel("Tên học sinh")
 plt.ylabel("Điểm trung bình")
-plt.show()
+
+plt.savefig("charts_1.png")
 
 # Vẽ biểu đồ hộp (boxplot) phân bố điểm
 df[["Math", "Physics", "Chemistry"]].plot(kind="box")
 plt.title("Phân bố điểm theo môn học")
-plt.show()
+
+plt.savefig("charts_2.png")

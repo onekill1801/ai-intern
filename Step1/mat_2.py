@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg")  
 
 # Dữ liệu mảng (list of dict)
 data = [
@@ -30,4 +32,5 @@ axes[1].set_title("Phân bố điểm theo môn học")
 
 # Hiển thị cả 2 biểu đồ cùng lúc
 plt.tight_layout()
+# plt.savefig("charts.png")
 plt.show()
