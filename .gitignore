@@ -25,7 +25,7 @@ Thumbs.db
 
 # Test results
 testdata/
-
+Game/Pacman/__pycache__/
 __debug*
 
 venv/
