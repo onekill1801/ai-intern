@@ -1,0 +1,73 @@
+import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict
+
+# URL = "https://kyta.fpt.com/bldt/services/egenid/api/incr/e-qdtha"
+# URL = "https://eaccount.kyta.fpt.com/services/egenid/api/incr/e-qdtha"
+URL = "https://econtract.fpt.com/app/services/egenid/api/incr/e-qdtha"
+HEADERS = {
+    "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aSI6eyJncm91cHNOYW1lIjpbIkFETUlOIiwia3l0YS5mcHQuZGVtb0BnbWFpbC5jb20iXSwicm9sZXMiOltdLCJncm91cHMiOlsxMTQ3NywxNDY3NV0sImlwQWNjZXNzIjpbXSwibG9naW4iOiJreXRhLmZwdC5kZW1vQGdtYWlsLmNvbSIsImZvbGRlcklkIjoiMDAwMDYxN244SFE1WFRiRGI1NlhxbVRCZDBhIiwiZm9sZGVyUGF0aCI6Ii9zdG9yYWdlLTAxLzU2ODIiLCJkYlN1ZmZpeCI6IjAwMDA2IiwibGFuZ0tleSI6InZpIiwiY3VzdElkIjo1NjgyLCJvcmdJbiI6Ii81NjgyLzEyMTYwIiwiaWQiOjE0MDIwMCwiZW1haWwiOiJreXRhLmZwdC5kZW1vQGdtYWlsLmNvbSJ9LCJ1c2VyX25hbWUiOiJreXRhLmZwdC5kZW1vQGdtYWlsLmNvbSIsInNjb3BlIjpbIm9wZW5pZCJdLCJleHAiOjE3NjAwMzg0ODksImlhdCI6MTc2MDAzNjY4OSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUkdfQ0hBTUVMRU9OIiwiUk9MRV9DVVNUX0RPQyIsIlJPTEVfT1JHX0FETUlOIiwiUk9MRV9VU0VSIl0sImp0aSI6IjgxOGJiYWJmLTliYzQtNDhhMi04ZWM2LTI2MmIyNTM5OGMwOCIsImNsaWVudF9pZCI6IndlYl9hcHAifQ.irPDx5SHUJnycK9Zph6R6jrz_awDJUiNXfmGDMY5ihJW3tpnRk10xbkyLZ1CBbTCXH-ucAbsnwrWggtIoYzZMOnvDkDYQBRKZL7Fpt1rGAsiSgC0LAxP7Om54sPO4z7JgmdsOC9v_zszIr4zhWP2Rt6cmSNXvAoo23thJlYuNAVXZekqfCle03UN-AUJMt4IKdehDB9es62TuU2HzpcLKmgdABerq4XLR-bFKAC5Zfd9JvkAJmTKUv8D0RoTUqC0QD4WNPo4P39Gv1Ok92nEk8sxdmszt6MC_rR5CpcYupfMgWgujxllCviZ4vuMovW3w5Hxl35d6CNmphrv71m36A"
+}
+
+# ✅ Danh sách tham số test (agencyCode khác nhau)
+AGENCY_CODES = ["dangnd4", "dangnd5", "dangnd6"]
+DOCUMENT_TYPE = "test"
+
+def call_api(i, agency_code):
+    params = {"agencyCode": agency_code, "documentType": DOCUMENT_TYPE}
+    try:
+        r = requests.get(URL, headers=HEADERS, params=params, timeout=5)
+        num = None
+        if r.status_code == 200:
+            try:
+                # Nếu backend trả JSON dạng {"number": 123}
+                data = r.json()
+                num = data.get("number") or r.text.strip()
+            except Exception:
+                num = r.text.strip()
+        return (i, agency_code, r.status_code, num)
+    except Exception as e:
+        return (i, agency_code, "ERROR", str(e))
+
+def main():
+    total_requests = 2000
+    concurrency = 40
+
+    results = []
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        futures = [
+            executor.submit(call_api, i, agency)
+            for i, agency in enumerate(
+                [AGENCY_CODES[i % len(AGENCY_CODES)] for i in range(total_requests)],
+                1,
+            )
+        ]
+        for f in as_completed(futures):
+            i, agency, status, num = f.result()
+            print(f"[{i:04d}] {status} {agency} -> {num}")
+            results.append((agency, status, num))
+
+    # 🧮 Thống kê kết quả
+    numbers_by_agency = defaultdict(set)
+    duplicates = []
+
+    for agency, status, num in results:
+        if status != 200 or num is None:
+            continue
+        if num in numbers_by_agency[agency]:
+            duplicates.append((agency, num))
+        numbers_by_agency[agency].add(num)
+
+    print("\n===== 📊 KẾT QUẢ =====")
+    for agency, nums in numbers_by_agency.items():
+        print(f"{agency}: {len(nums)} số duy nhất")
+
+    if duplicates:
+        print("\n⚠️ TRÙNG SỐ PHÁT HIỆN:")
+        for agency, num in duplicates:
+            print(f" - {agency}: {num}")
+    else:
+        print("\n✅ KHÔNG CÓ SỐ TRÙNG!")
+
+if __name__ == "__main__":
+    main()
