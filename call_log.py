@@ -18,12 +18,14 @@ headers = {
 
 # === 3️⃣ instId mới cần sửa ===
 # new_inst_id = 0
-num_inst = 5
+num_inst = 10
 
 # === 4️⃣ Gửi PUT request cho từng phần tử ===
 for idx, item in enumerate(data_list):
     new_inst_id = idx % num_inst  # chia đều theo vị trí
-    item["instId"] = new_inst_id
+    # item["instId"] = new_inst_id
+    item["workerId"] = new_inst_id
+    item["status"] = "processing"
 
     response = requests.put(url, headers=headers, json=item)
 
