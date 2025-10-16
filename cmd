@@ -2,6 +2,7 @@
 
 source venv/bin/activate
 venv\Scripts\Activate.ps1
+venv\Scripts\activate.bat
 
 python -m pip install --upgrade pip
 

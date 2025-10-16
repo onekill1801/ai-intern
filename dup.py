@@ -1,7 +1,7 @@
 from collections import Counter
 
 # === 1️⃣ Đường dẫn file ===
-file_path = "done.log"   # đổi tên file của bạn ở đây
+file_path = "id.txt"   # đổi tên file của bạn ở đây
 
 # === 2️⃣ Đọc toàn bộ danh sách ID ===
 with open(file_path, "r", encoding="utf-8") as f:
