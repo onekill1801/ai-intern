@@ -29,3 +29,4 @@ Game/Pacman/__pycache__/
 __debug*
 
 venv/
+downloads*/
