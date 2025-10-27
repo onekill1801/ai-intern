@@ -1,5 +1,6 @@
 import json
 import requests
+import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # === 1️⃣ Đọc data list từ file JSON ===
@@ -19,7 +20,7 @@ headers = {
 
 # === 3️⃣ instId mới cần sửa ===
 # new_inst_id = 0
-num_inst = 2
+num_inst = 5
 num_workers = 10
 index = 0
 max_threads = 100  # Số luồng tối đa
@@ -47,10 +48,10 @@ max_threads = 100  # Số luồng tối đa
 
 # ==== Hàm gửi PUT request ====
 def update_item(idx, item):
-    new_inst_id = idx % num_inst
-    new_worker_id = idx % num_workers
+    new_inst_id = random.randint(0, num_inst - 1)
+    new_worker_id = random.randint(0, num_workers - 1)
 
-    item["instId"] = 1
+    item["instId"] = new_inst_id
     item["workerId"] = new_worker_id
     item["status"] = "processing"
 
