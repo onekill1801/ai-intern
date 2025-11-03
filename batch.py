@@ -5,7 +5,7 @@ import time
 # API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps-asyncs/retry/"
 API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps/retry/"
 TOKEN = ""  # <-- Dán token thật
-JOB_FILE = "job_ids_step_1.txt"  # file chứa danh sách jobId (mỗi dòng 1 ID)
+JOB_FILE = "job_ids_1.txt"  # file chứa danh sách jobId (mỗi dòng 1 ID)
 BATCH_SIZE = 5            # số job xử lý mỗi đợt
 DELAY_SECONDS = 40        # thời gian nghỉ giữa các đợt (20 giây)
 
