@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 
 API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps-asyncs/retry/"
-TOKEN = ""  # <-- Dán token thật của bạn ở đây
+TOKEN = os.getenv("EREQUEST_TOKEN")
 JOB_FILE = "job_ids_1.txt"  # file chứa danh sách jobId, mỗi dòng 1 id
 MAX_CONCURRENT = 3  # số luồng chạy song song
 

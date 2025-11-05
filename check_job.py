@@ -1,9 +1,13 @@
+from dotenv import load_dotenv
+import os
 import asyncio
 import aiohttp
 import json
 
+load_dotenv() 
+
 API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/jobs/"
-TOKEN = ""   # <-- thay token thật vào đây
+TOKEN = os.getenv("EREQUEST_TOKEN")
 JOB_FILE = "job_failed_ids.txt"                        # file chứa danh sách jobId (mỗi dòng 1 id)
 OUTPUT_FILE = "not_done_jobs.txt"               # file ghi job chưa DONE
 CONCURRENCY = 5                                 # số luồng đồng thời

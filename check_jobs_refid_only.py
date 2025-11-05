@@ -1,11 +1,15 @@
+from dotenv import load_dotenv
+import os
 import asyncio
 import aiohttp
 import json
 
+load_dotenv() 
+
 API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/jobs/"
-TOKEN = ""   # <-- thay token thật vào đây
+TOKEN = os.getenv("EREQUEST_TOKEN")
 JOB_FILE = "job_ids_1.txt"                # file chứa danh sách jobId (mỗi dòng 1 id)
-OUTPUT_FILE = "not_done_jobs.txt"              # file ghi job chưa DONE kèm refId
+OUTPUT_FILE = "error_jobs.txt"              # file ghi job chưa DONE kèm refId
 CONCURRENCY = 5                                # số luồng đồng thời
 
 
@@ -36,7 +40,7 @@ async def worker(job_ids, output_queue):
         tasks = [fetch_job_refid(session, job_id) for job_id in job_ids]
         results = await asyncio.gather(*tasks)
         for job_id, status, ref_id in results:
-            if status != "DONE" and ref_id:
+            if status == "ERROR" and ref_id:
                 await output_queue.put((job_id, ref_id))
 
 

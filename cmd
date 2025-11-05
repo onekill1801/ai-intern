@@ -16,7 +16,7 @@ pip install ale-py
 
 pip install gym[atari]
 
-pip freeze > equirements.txt
+pip freeze > requirements.txt
 pip install -r requirements.txt
 
 pip list

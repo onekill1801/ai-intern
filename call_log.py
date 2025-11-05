@@ -11,7 +11,7 @@ with open(input_file, "r", encoding="utf-8") as f:
 # === 2️⃣ Cấu hình API ===
 url = "https://eaccount.kyta.fpt.com/services/document-service/api/call-log"
 
-token = ""  # Dán token thật của bạn vào đây
+token = os.getenv("EREQUEST_TOKEN")
 
 headers = {
     "Content-Type": "application/json",
