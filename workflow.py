@@ -88,6 +88,7 @@ def process_ticket(ticket_id):
                 print(f"✅ Sử dụng AI3 (implementerId=null) -> {target_id}")
             else:
                 print("🛑 implementerId của cả AI1+2 và AI3 đều khác null -> Dừng.")
+                arr_done.append(ticket_id)
                 return
 
     # 4️⃣ Gọi API2
@@ -121,57 +122,59 @@ def process_ticket(ticket_id):
     elif status is None or output is None:
         print("⚠️ Không có output/status -> recall OCR")
         arr_none.append(ticket_id)
-        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        call_api(url4, method="POST")
+        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        # call_api(url4, method="POST")
         return
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        resp3 = call_api(url3, method="DELETE")
-        if resp3 and resp3.status_code == 204:
-            print("✅ API3 xoá thành công, recall lại API4")
-            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            call_api(url4, method="POST")
-        else:
-            print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        # resp3 = call_api(url3, method="DELETE")
+        # if resp3 and resp3.status_code == 204:
+        #     print("✅ API3 xoá thành công, recall lại API4")
+        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        #     call_api(url4, method="POST")
+        # else:
+        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
         process += 1
-        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        resp3 = call_api(url3, method="DELETE")
-        if resp3 and resp3.status_code == 204:
-            print("✅ API3 xoá thành công, recall lại API4")
-            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            call_api(url4, method="POST")
-        else:
-            print("⚠️ API3 xoá thất bại hoặc không trả 204")
-        return
+        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        # resp3 = call_api(url3, method="DELETE")
+        # if resp3 and resp3.status_code == 204:
+        #     print("✅ API3 xoá thành công, recall lại API4")
+        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        #     call_api(url4, method="POST")
+        # else:
+        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        # return
     else:
         if message is not None:
             faild += 1
             arr_network.append(ticket_id)
             print(f"❗ Message từ API2: {message}")
-            url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-            resp3 = call_api(url3, method="DELETE")
-            if resp3 and resp3.status_code == 204:
-                print("✅ API3 xoá thành công, recall lại API4")
-                url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-                call_api(url4, method="POST")
+            # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+            # resp3 = call_api(url3, method="DELETE")
+            # if resp3 and resp3.status_code == 204:
+            #     print("✅ API3 xoá thành công, recall lại API4")
+            #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            #     call_api(url4, method="POST")
         else:
+            arr_none.append(ticket_id)
             print("⚠️ Trạng thái không xác định, dừng xử lý.")
 
 
 # === MAIN ===
 if __name__ == "__main__":
     # đọc danh sách ticket từ file (mỗi dòng 1 ticketId)
-    with open("out.txt") as f:
+    print("=== Start time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    with open("error.txt") as f:
         ticket_ids = [line.strip() for line in f if line.strip()]
 
     for tid in ticket_ids:
         process_ticket(tid)
-        time.sleep(2)  # tránh spam server
+        time.sleep(0.5)  # tránh spam server
 
     print(f"\n=== Kết thúc xử lý ===\nTổng ticket đang PROCESSING: {process}\nTổng ticket bị FAILD: {faild}")
     print(f"Ticket PROCESSING: {arr_process}")
@@ -180,3 +183,4 @@ if __name__ == "__main__":
     print(f"Ticket NONE: {arr_none}")
     print(f"Ticket AI1 only: {arr_ai1}")
     print(f"Ticket NETWORK issues: {arr_network}")
+    print("=== END time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
