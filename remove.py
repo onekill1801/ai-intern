@@ -1,7 +1,7 @@
 # Đường dẫn đến file gốc
-input_file = "du_lieu_khong_trung.txt"
+input_file = "error_jobs.txt"
 # File sau khi loại bỏ dữ liệu trùng
-output_file = "out.txt"
+output_file = "error.txt"
 
 # Đọc file và loại bỏ trùng lặp
 with open(input_file, "r", encoding="utf-8") as f:

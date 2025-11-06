@@ -1,9 +1,13 @@
+from dotenv import load_dotenv
+import os
 import asyncio
 import aiohttp
 import time
 
-# API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps-asyncs/retry/"
-API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps/retry/"
+load_dotenv() 
+
+API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps-asyncs/retry/"
+# API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/job-steps/retry/"
 TOKEN = os.getenv("EREQUEST_TOKEN")
 JOB_FILE = "job_ids_1.txt"  # file chứa danh sách jobId (mỗi dòng 1 ID)
 BATCH_SIZE = 5            # số job xử lý mỗi đợt

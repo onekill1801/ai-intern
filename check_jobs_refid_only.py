@@ -40,7 +40,7 @@ async def worker(job_ids, output_queue):
         tasks = [fetch_job_refid(session, job_id) for job_id in job_ids]
         results = await asyncio.gather(*tasks)
         for job_id, status, ref_id in results:
-            if status == "ERROR" and ref_id:
+            if status != "DONE" and ref_id:
                 await output_queue.put((job_id, ref_id))
 
 
