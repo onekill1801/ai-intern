@@ -23,6 +23,7 @@ arr_network = []
 arr_done = []
 arr_none = []
 arr_ai1 = []
+arr_hold = []
 
 # === Hàm tiện ích ===
 def call_api(url, method="GET", data=None):
@@ -96,8 +97,9 @@ def process_ticket(ticket_id):
     resp2 = call_api(url2)
     if not resp2 or resp2.status_code != 200:
         print("❌ Lỗi khi gọi API2 -> Thử recall (API4)")
-        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        call_api(url4, method="POST")
+        arr_hold.append(ticket_id)
+        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        # call_api(url4, method="POST")
         return
         
     try:
@@ -169,12 +171,12 @@ def process_ticket(ticket_id):
 if __name__ == "__main__":
     # đọc danh sách ticket từ file (mỗi dòng 1 ticketId)
     print("=== Start time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    with open("error.txt") as f:
+    with open("id_list.txt") as f:
         ticket_ids = [line.strip() for line in f if line.strip()]
 
     for tid in ticket_ids:
         process_ticket(tid)
-        time.sleep(0.5)  # tránh spam server
+        time.sleep(2)  # tránh spam server
 
     print(f"\n=== Kết thúc xử lý ===\nTổng ticket đang PROCESSING: {process}\nTổng ticket bị FAILD: {faild}")
     print(f"Ticket PROCESSING: {arr_process}")
@@ -184,3 +186,43 @@ if __name__ == "__main__":
     print(f"Ticket AI1 only: {arr_ai1}")
     print(f"Ticket NETWORK issues: {arr_network}")
     print("=== END time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+
+
+    # process = len(arr_process)
+    # faild = len(arr_faild)
+
+    # # --- Thư mục để chứa kết quả ---
+    # output_dir = "results"
+    # os.makedirs(output_dir, exist_ok=True)
+
+    # # --- Ghi tóm tắt chung ---
+    # summary_file = os.path.join(output_dir, "summary.txt")
+    # with open(summary_file, "w", encoding="utf-8") as f:
+    #     f.write("=== Kết thúc xử lý ===\n")
+    #     f.write(f"Tổng ticket đang PROCESSING: {process}\n")
+    #     f.write(f"Tổng ticket bị FAILD: {faild}\n")
+    #     f.write(f"=== END time === {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\n")
+
+    # print(f"📄 Đã ghi file tóm tắt: {summary_file}")
+
+    # # --- Danh sách các list cần ghi ---
+    # data_lists = {
+    #     "processing": arr_process,
+    #     "faild": arr_faild,
+    #     "done": arr_done,
+    #     "none": arr_none,
+    #     "ai1_only": arr_ai1,
+    #     "network": arr_network,
+    #     "hold": arr_hold
+    # }
+
+    # # --- Ghi từng list ra file riêng ---
+    # for name, data in data_lists.items():
+    #     file_path = os.path.join(output_dir, f"{name}.txt")
+    #     with open(file_path, "w", encoding="utf-8") as f:
+    #         f.write(f"=== Ticket {name.upper()} ({len(data)}) ===\n")
+    #         for item in data:
+    #             f.write(f"{item}\n")
+    #     print(f"✅ Đã ghi {len(data)} dòng vào {file_path}")
+
+    # print("\n🎉 Hoàn tất ghi toàn bộ file!")
