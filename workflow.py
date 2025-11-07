@@ -24,6 +24,7 @@ arr_done = []
 arr_none = []
 arr_ai1 = []
 arr_hold = []
+arr_api5 = []
 
 # === Hàm tiện ích ===
 def call_api(url, method="GET", data=None):
@@ -94,18 +95,29 @@ def process_ticket(ticket_id):
 
     # 4️⃣ Gọi API2
     url2 = f"{BASE_URL}/ai-response-content/getAiResponseActive/{ticket_id}/{target_id}"
+    url5 = f"{BASE_URL}/tickets/callback/saveFormDataByVariables/{ticket_id}/{target_id}"
     resp2 = call_api(url2)
     if not resp2 or resp2.status_code != 200:
         print("❌ Lỗi khi gọi API2 -> Thử recall (API4)")
         arr_hold.append(ticket_id)
-        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        # call_api(url4, method="POST")
+        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        call_api(url4, method="POST")
         return
         
     try:
         _ = resp2.json()
     except json.JSONDecodeError:
-        print("⚠️ API2 trả về không phải JSON hợp lệ -> dừng xử lý.")
+        print("⚠️ API2 trả về không phải JSON hợp lệ -> call API5")
+        resp5 = call_api(url5)
+        arr_api5.append(ticket_id)
+        try :
+            _ = resp5.json()
+            print("✅ API5 recallForm thành công, recall lại API4")
+            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            call_api(url4, method="POST")
+        except json.JSONDecodeError:
+            print("⚠️ API5 trả về không phải JSON hợp lệ -> dừng xử lý.")
+            return
         return
 
     data2 = resp2.json()
@@ -124,20 +136,20 @@ def process_ticket(ticket_id):
     elif status is None or output is None:
         print("⚠️ Không có output/status -> recall OCR")
         arr_none.append(ticket_id)
-        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        # call_api(url4, method="POST")
+        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        call_api(url4, method="POST")
         return
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        # resp3 = call_api(url3, method="DELETE")
-        # if resp3 and resp3.status_code == 204:
-        #     print("✅ API3 xoá thành công, recall lại API4")
-        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        #     call_api(url4, method="POST")
-        # else:
-        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        resp3 = call_api(url3, method="DELETE")
+        if resp3 and resp3.status_code == 204:
+            print("✅ API3 xoá thành công, recall lại API4")
+            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            call_api(url4, method="POST")
+        else:
+            print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
@@ -156,12 +168,12 @@ def process_ticket(ticket_id):
             faild += 1
             arr_network.append(ticket_id)
             print(f"❗ Message từ API2: {message}")
-            # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-            # resp3 = call_api(url3, method="DELETE")
-            # if resp3 and resp3.status_code == 204:
-            #     print("✅ API3 xoá thành công, recall lại API4")
-            #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            #     call_api(url4, method="POST")
+            url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+            resp3 = call_api(url3, method="DELETE")
+            if resp3 and resp3.status_code == 204:
+                print("✅ API3 xoá thành công, recall lại API4")
+                url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+                call_api(url4, method="POST")
         else:
             arr_none.append(ticket_id)
             print("⚠️ Trạng thái không xác định, dừng xử lý.")
@@ -171,12 +183,12 @@ def process_ticket(ticket_id):
 if __name__ == "__main__":
     # đọc danh sách ticket từ file (mỗi dòng 1 ticketId)
     print("=== Start time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    with open("id_list.txt") as f:
+    with open("error.txt") as f:
         ticket_ids = [line.strip() for line in f if line.strip()]
 
     for tid in ticket_ids:
         process_ticket(tid)
-        time.sleep(2)  # tránh spam server
+        time.sleep(60)  # tránh spam server
 
     print(f"\n=== Kết thúc xử lý ===\nTổng ticket đang PROCESSING: {process}\nTổng ticket bị FAILD: {faild}")
     print(f"Ticket PROCESSING: {arr_process}")
@@ -188,41 +200,42 @@ if __name__ == "__main__":
     print("=== END time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
 
-    # process = len(arr_process)
-    # faild = len(arr_faild)
+    process = len(arr_process)
+    faild = len(arr_faild)
 
-    # # --- Thư mục để chứa kết quả ---
-    # output_dir = "results"
-    # os.makedirs(output_dir, exist_ok=True)
+    # --- Thư mục để chứa kết quả ---
+    output_dir = "results"
+    os.makedirs(output_dir, exist_ok=True)
 
-    # # --- Ghi tóm tắt chung ---
-    # summary_file = os.path.join(output_dir, "summary.txt")
-    # with open(summary_file, "w", encoding="utf-8") as f:
-    #     f.write("=== Kết thúc xử lý ===\n")
-    #     f.write(f"Tổng ticket đang PROCESSING: {process}\n")
-    #     f.write(f"Tổng ticket bị FAILD: {faild}\n")
-    #     f.write(f"=== END time === {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\n")
+    # --- Ghi tóm tắt chung ---
+    summary_file = os.path.join(output_dir, "summary.txt")
+    with open(summary_file, "w", encoding="utf-8") as f:
+        f.write("=== Kết thúc xử lý ===\n")
+        f.write(f"Tổng ticket đang PROCESSING: {process}\n")
+        f.write(f"Tổng ticket bị FAILD: {faild}\n")
+        f.write(f"=== END time === {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\n")
 
-    # print(f"📄 Đã ghi file tóm tắt: {summary_file}")
+    print(f"📄 Đã ghi file tóm tắt: {summary_file}")
 
-    # # --- Danh sách các list cần ghi ---
-    # data_lists = {
-    #     "processing": arr_process,
-    #     "faild": arr_faild,
-    #     "done": arr_done,
-    #     "none": arr_none,
-    #     "ai1_only": arr_ai1,
-    #     "network": arr_network,
-    #     "hold": arr_hold
-    # }
+    # --- Danh sách các list cần ghi ---
+    data_lists = {
+        "processing": arr_process,
+        "faild": arr_faild,
+        "done": arr_done,
+        "none": arr_none,
+        "ai1_only": arr_ai1,
+        "network": arr_network,
+        "hold": arr_hold,
+        "api5": arr_api5
+    }
 
-    # # --- Ghi từng list ra file riêng ---
-    # for name, data in data_lists.items():
-    #     file_path = os.path.join(output_dir, f"{name}.txt")
-    #     with open(file_path, "w", encoding="utf-8") as f:
-    #         f.write(f"=== Ticket {name.upper()} ({len(data)}) ===\n")
-    #         for item in data:
-    #             f.write(f"{item}\n")
-    #     print(f"✅ Đã ghi {len(data)} dòng vào {file_path}")
+    # --- Ghi từng list ra file riêng ---
+    for name, data in data_lists.items():
+        file_path = os.path.join(output_dir, f"{name}.txt")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(f"=== Ticket {name.upper()} ({len(data)}) ===\n")
+            for item in data:
+                f.write(f"{item}\n")
+        print(f"✅ Đã ghi {len(data)} dòng vào {file_path}")
 
-    # print("\n🎉 Hoàn tất ghi toàn bộ file!")
+    print("\n🎉 Hoàn tất ghi toàn bộ file!")
