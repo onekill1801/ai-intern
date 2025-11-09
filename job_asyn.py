@@ -5,11 +5,13 @@ with open('data.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 # Lọc ra những job có retryCount == 5 (ở cấp ngoài)
-job_ids = [
-    job["jobId"]
-    for job in data
-    if isinstance(job, dict) and job.get("retryCount") == 5
-]
+# job_ids = [
+#     job["resourceId"]
+#     for job in data
+#     if isinstance(job, dict) and job.get("retryCount") == 5
+# ]
+# Lấy toàn bộ jobId
+job_ids = [job['resourceId'] for job in data]
 
 # Ghi ra file
 with open("job_step_id.txt", "w", encoding="utf-8") as f:
