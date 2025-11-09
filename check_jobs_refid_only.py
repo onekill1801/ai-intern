@@ -6,7 +6,8 @@ import json
 
 load_dotenv() 
 
-API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/jobs/"
+# API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/jobs/"
+API_BASE = "https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId="
 TOKEN = os.getenv("EREQUEST_TOKEN")
 JOB_FILE = "job_step_id.txt"                # file chứa danh sách jobId (mỗi dòng 1 id)
 OUTPUT_FILE = "error_jobs.txt"              # file ghi job chưa DONE kèm refId

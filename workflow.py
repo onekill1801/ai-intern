@@ -69,8 +69,13 @@ def process_ticket(ticket_id):
         if not ai11:
             print("⚠️ Không thấy recipient AI 1")
             return
-        arr_ai1.append(ticket_id)
+        # urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
+        # respcheck = call_api(urlcheckjob)
+        # checkdata = respcheck.json()
+        # checkstatus = checkdata.get("status")
+        # print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
         if ai11.get("implementerId") is None:
+            arr_ai1.append(ticket_id)
             target_id = ai11["id"]
             print(f"✅ Sử dụng AI 1 (implementerId=null) -> {target_id}")
         else:
@@ -100,8 +105,8 @@ def process_ticket(ticket_id):
     if not resp2 or resp2.status_code != 200:
         print("❌ Lỗi khi gọi API2 -> Thử recall (API4)")
         arr_hold.append(ticket_id)
-        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        call_api(url4, method="POST")
+        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        # call_api(url4, method="POST")
         return
         
     try:
@@ -113,8 +118,8 @@ def process_ticket(ticket_id):
         try :
             _ = resp5.json()
             print("✅ API5 recallForm thành công, recall lại API4")
-            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            call_api(url4, method="POST")
+            # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            # call_api(url4, method="POST")
         except json.JSONDecodeError:
             print("⚠️ API5 trả về không phải JSON hợp lệ -> dừng xử lý.")
             return
@@ -123,6 +128,8 @@ def process_ticket(ticket_id):
     data2 = resp2.json()
     output = data2.get("output", {})
     status = output.get("status") or data2.get("status")
+    data = output.get("data") or {}
+    jobId = data.get("jobId")
     message = output.get("message")
     api2_id = data2.get("id")
 
@@ -136,24 +143,29 @@ def process_ticket(ticket_id):
     elif status is None or output is None:
         print("⚠️ Không có output/status -> recall OCR")
         arr_none.append(ticket_id)
-        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        call_api(url4, method="POST")
+        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        # call_api(url4, method="POST")
         return
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        resp3 = call_api(url3, method="DELETE")
-        if resp3 and resp3.status_code == 204:
-            print("✅ API3 xoá thành công, recall lại API4")
-            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            call_api(url4, method="POST")
-        else:
-            print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        # resp3 = call_api(url3, method="DELETE")
+        # if resp3 and resp3.status_code == 204:
+        #     print("✅ API3 xoá thành công, recall lại API4")
+        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        #     call_api(url4, method="POST")
+        # else:
+        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
         process += 1
+        urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
+        respcheck = call_api(urlcheckjob)
+        checkdata = respcheck.json()
+        checkstatus = checkdata.get("status")
+        print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
         # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
         # resp3 = call_api(url3, method="DELETE")
         # if resp3 and resp3.status_code == 204:
@@ -168,12 +180,12 @@ def process_ticket(ticket_id):
             faild += 1
             arr_network.append(ticket_id)
             print(f"❗ Message từ API2: {message}")
-            url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-            resp3 = call_api(url3, method="DELETE")
-            if resp3 and resp3.status_code == 204:
-                print("✅ API3 xoá thành công, recall lại API4")
-                url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-                call_api(url4, method="POST")
+            # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+            # resp3 = call_api(url3, method="DELETE")
+            # if resp3 and resp3.status_code == 204:
+            #     print("✅ API3 xoá thành công, recall lại API4")
+            #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            #     call_api(url4, method="POST")
         else:
             arr_none.append(ticket_id)
             print("⚠️ Trạng thái không xác định, dừng xử lý.")
@@ -183,12 +195,12 @@ def process_ticket(ticket_id):
 if __name__ == "__main__":
     # đọc danh sách ticket từ file (mỗi dòng 1 ticketId)
     print("=== Start time ===", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    with open("error.txt") as f:
+    with open("ids.txt") as f:
         ticket_ids = [line.strip() for line in f if line.strip()]
 
     for tid in ticket_ids:
         process_ticket(tid)
-        time.sleep(60)  # tránh spam server
+        time.sleep(0.5)  # tránh spam server
 
     print(f"\n=== Kết thúc xử lý ===\nTổng ticket đang PROCESSING: {process}\nTổng ticket bị FAILD: {faild}")
     print(f"Ticket PROCESSING: {arr_process}")
@@ -204,7 +216,7 @@ if __name__ == "__main__":
     faild = len(arr_faild)
 
     # --- Thư mục để chứa kết quả ---
-    output_dir = "results"
+    output_dir = "results1"
     os.makedirs(output_dir, exist_ok=True)
 
     # --- Ghi tóm tắt chung ---
