@@ -1,7 +1,11 @@
+from dotenv import load_dotenv
+import os
 import json
 import requests
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+load_dotenv() 
 
 # === 1️⃣ Đọc data list từ file JSON ===
 input_file = "data.json"  # đổi tên file nếu cần

@@ -26,6 +26,7 @@ arr_none = []
 arr_ai1 = []
 arr_hold = []
 arr_api5 = []
+arr_job = []
 
 # === Hàm tiện ích ===
 def call_api(url, method="GET", data=None):
@@ -173,23 +174,25 @@ def process_ticket(ticket_id):
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        # resp3 = call_api(url3, method="DELETE")
-        # if resp3 and resp3.status_code == 204:
-        #     print("✅ API3 xoá thành công, recall lại API4")
-        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        #     call_api(url4, method="POST")
-        # else:
-        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        resp3 = call_api(url3, method="DELETE")
+        if resp3 and resp3.status_code == 204:
+            print("✅ API3 xoá thành công, recall lại API4")
+            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            call_api(url4, method="POST")
+        else:
+            print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
         process += 1
-        # urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
-        # respcheck = call_api(urlcheckjob)
-        # checkdata = respcheck.json()
-        # checkstatus = checkdata.get("status")
-        # print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
+        urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
+        respcheck = call_api(urlcheckjob)
+        checkdata = respcheck.json()
+        checkstatus = checkdata.get("status")
+        print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
+        if checkstatus == "PROCESSING":
+            arr_job.append(jobId)
 
         # save file
         # log_file = os.path.join("results1", "job_status_log.csv")
@@ -248,7 +251,7 @@ if __name__ == "__main__":
     faild = len(arr_faild)
 
     # --- Thư mục để chứa kết quả ---
-    output_dir = "results3"
+    output_dir = "results2"
     os.makedirs(output_dir, exist_ok=True)
 
     # --- Ghi tóm tắt chung ---
@@ -270,7 +273,8 @@ if __name__ == "__main__":
         "ai1_only": arr_ai1,
         "network": arr_network,
         "hold": arr_hold,
-        "api5": arr_api5
+        "api5": arr_api5,
+        "arr_job": arr_job
     }
 
     # --- Ghi từng list ra file riêng ---

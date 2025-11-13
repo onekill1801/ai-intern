@@ -30,3 +30,8 @@ __debug*
 
 venv/
 downloads*/
+results*/
+.env
+*.txt
+*.log
+*.json
