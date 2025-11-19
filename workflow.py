@@ -148,7 +148,7 @@ def process_ticket(ticket_id):
     data = output.get("data") or {}
     jobId = data.get("jobId")
     last_modified_str = data2.get("lastModifiedDate")
-    if is_older_than(last_modified_str, "2025-11-12T20:00:00Z"):
+    if is_older_than(last_modified_str, "2025-11-13T09:00:00Z"):
         print("DONE")
         # return
     else: 
@@ -173,14 +173,14 @@ def process_ticket(ticket_id):
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        # resp3 = call_api(url3, method="DELETE")
-        # if resp3 and resp3.status_code == 204:
-        #     print("✅ API3 xoá thành công, recall lại API4")
-        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        #     call_api(url4, method="POST")
-        # else:
-        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        resp3 = call_api(url3, method="DELETE")
+        if resp3 and resp3.status_code == 204:
+            print("✅ API3 xoá thành công, recall lại API4")
+            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            call_api(url4, method="POST")
+        else:
+            print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
@@ -191,13 +191,15 @@ def process_ticket(ticket_id):
         # checkstatus = checkdata.get("status")
         # print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
 
-        # save file
-        # log_file = os.path.join("results1", "job_status_log.csv")
-        # os.makedirs("results1", exist_ok=True)
+        # # save file
+        # log_file = os.path.join("results2", "job_status_log.csv")
+        # os.makedirs("results2", exist_ok=True)
         # with open(log_file, "a", encoding="utf-8") as f:
         #     f.write(f"{ticket_id},{jobId},{checkstatus}\n")
         # print(f"📝 Đã ghi log job status vào {log_file}")
 
+        # if checkstatus == "DONE":
+        #     return
         # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
         # resp3 = call_api(url3, method="DELETE")
         # if resp3 and resp3.status_code == 204:
