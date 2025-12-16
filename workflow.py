@@ -122,8 +122,8 @@ def process_ticket(ticket_id):
     if not resp2 or resp2.status_code != 200:
         print("❌ Lỗi khi gọi API2 -> Thử recall (API4)")
         arr_hold.append(ticket_id)
-        # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-        # call_api(url4, method="POST")
+        url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        call_api(url4, method="POST")
         return
         
     try:
@@ -148,7 +148,7 @@ def process_ticket(ticket_id):
     data = output.get("data") or {}
     jobId = data.get("jobId")
     last_modified_str = data2.get("lastModifiedDate")
-    if is_older_than(last_modified_str, "2025-11-13T09:00:00Z"):
+    if is_older_than(last_modified_str, "2025-12-08T08:44:00Z"):
         print("DONE")
         # return
     else: 
@@ -173,33 +173,36 @@ def process_ticket(ticket_id):
     elif status == "ERROR":
         print("❌ status=ERROR -> gọi API3 (DELETE)")
         arr_faild.append(ticket_id)
-        url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
-        resp3 = call_api(url3, method="DELETE")
-        if resp3 and resp3.status_code == 204:
-            print("✅ API3 xoá thành công, recall lại API4")
-            url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
-            call_api(url4, method="POST")
-        else:
-            print("⚠️ API3 xoá thất bại hoặc không trả 204")
+        # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
+        # resp3 = call_api(url3, method="DELETE")
+        # if resp3 and resp3.status_code == 204:
+        #     print("✅ API3 xoá thành công, recall lại API4")
+        #     url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+        #     call_api(url4, method="POST")
+        # else:
+        #     print("⚠️ API3 xoá thất bại hoặc không trả 204")
     elif status == "PROCESSING":
         print("❌ status=PROCESSING -> gọi API3 (DELETE)")
         arr_process.append(ticket_id)
         process += 1
-        # urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
-        # respcheck = call_api(urlcheckjob)
-        # checkdata = respcheck.json()
-        # checkstatus = checkdata.get("status")
-        # print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
+        urlcheckjob = f"https://eaccount.kyta.fpt.com/services/eintelligent/api/v4/process?jobId={jobId}"
+        respcheck = call_api(urlcheckjob)
+        checkdata = respcheck.json()
+        checkstatus = checkdata.get("status")
+        print(f"📊 Kiểm tra jobId {jobId} status: {checkstatus}")
 
-        # # save file
-        # log_file = os.path.join("results2", "job_status_log.csv")
-        # os.makedirs("results2", exist_ok=True)
-        # with open(log_file, "a", encoding="utf-8") as f:
-        #     f.write(f"{ticket_id},{jobId},{checkstatus}\n")
-        # print(f"📝 Đã ghi log job status vào {log_file}")
+        # save file
+        log_file = os.path.join("results2", "job_status_log.csv")
+        os.makedirs("results2", exist_ok=True)
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(f"{ticket_id},{jobId},{checkstatus}\n")
+        print(f"📝 Đã ghi log job status vào {log_file}")
 
-        # if checkstatus == "DONE":
-        #     return
+        if checkstatus == "DONE":
+            # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
+            # call_api(url4, method="POST")
+            return
+
         # url3 = f"{BASE_URL}/ai-response-contents/{api2_id}"
         # resp3 = call_api(url3, method="DELETE")
         # if resp3 and resp3.status_code == 204:
@@ -234,7 +237,7 @@ if __name__ == "__main__":
 
     for tid in ticket_ids:
         process_ticket(tid)
-        time.sleep(0.5)  # tránh spam server
+        time.sleep(0.1)  # tránh spam server
 
     print(f"\n=== Kết thúc xử lý ===\nTổng ticket đang PROCESSING: {process}\nTổng ticket bị FAILD: {faild}")
     print(f"Ticket PROCESSING: {arr_process}")
