@@ -148,7 +148,7 @@ def process_ticket(ticket_id):
     data = output.get("data") or {}
     jobId = data.get("jobId")
     last_modified_str = data2.get("lastModifiedDate")
-    if is_older_than(last_modified_str, "2025-12-08T08:44:00Z"):
+    if is_older_than(last_modified_str, "2026-01-14T03:25:00Z"):
         print("DONE")
         # return
     else: 
@@ -198,7 +198,7 @@ def process_ticket(ticket_id):
             f.write(f"{ticket_id},{jobId},{checkstatus}\n")
         print(f"📝 Đã ghi log job status vào {log_file}")
 
-        if checkstatus == "DONE":
+        if True or checkstatus == "DONE":
             # url4 = f"{BASE_URL}/ai-response-content/recallOcrTicket/{ticket_id}/{target_id}"
             # call_api(url4, method="POST")
             return
